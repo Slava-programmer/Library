@@ -1,6 +1,7 @@
 package classes;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class LibraryWork {
@@ -35,7 +36,7 @@ public class LibraryWork {
                     5. Выдать книгу читателю;
                     6. Забрать обратно книгу у читателя;
                     7. Показать список всех книг, выданных читателям;
-                    8. Ещё какая-то менюшка;
+                    8. Показать список невыданных книг;
                     9. Для красоты;
                     0. Выход из программы.
                     """);
@@ -56,10 +57,13 @@ public class LibraryWork {
                     givingBookToVisitor();
                     break;
                 case "6":
+                    returnBook();
                     break;
                 case "7":
+                    printBooksByVisitors();
                     break;
                 case "8":
+                    printFreeBooks();
                     break;
                 case "9":
                     break;
@@ -84,6 +88,41 @@ public class LibraryWork {
             if (!booksArray.get(i).isIssue()) {
                 System.out.println((i + 1) + ". Наименование книги: " + booksArray.get(i).getName() + "\n   Автор книги: " + booksArray.get(i).getAuthor());
             }
+        }
+    }
+
+    public void printVisitorsBooks(int numVisitor) {
+        if (visitorArray.get(numVisitor).getBooksInUse().size() == 0) {
+            System.out.println("У читателя " + visitorArray.get(numVisitor).getName() + " сейчас нет книг.");
+        } else {
+            System.out.println("У читателя " + visitorArray.get(numVisitor).getName() + " есть следующие книги:");
+
+            for (int i = 0; i < visitorArray.get(numVisitor).getBooksInUse().size(); i++) {
+                System.out.println((i + 1) + ". " + visitorArray.get(numVisitor).getBooksInUse().get(i));
+            }
+        }
+    }
+
+    public void printBooksByVisitors() {
+        for (int i = 0; i < visitorArray.size(); i++) {
+            System.out.print("Читатель " + visitorArray.get(i).getName() + " читает: ");
+            if (visitorArray.get(i).getBooksInUse().size() == 0) {
+                System.out.print(" Нет книг.");
+            } else {
+                for (int j = 0; j < visitorArray.get(i).getBooksInUse().size(); j++) {
+                    System.out.print(visitorArray.get(i).getBooksInUse().get(j) + "; ");
+                }
+            }
+            System.out.println();
+        }
+    }
+    public void printFreeBooks(){
+        System.out.println("Сейчас доступны к выдаче: ");
+        for (int i = 0; i < booksArray.size(); i++) {
+            if (!booksArray.get(i).isIssue()){
+                System.out.println(booksArray.get(i).getName()+" автор "+booksArray.get(i).getAuthor());
+            }
+
         }
     }
 
@@ -133,6 +172,9 @@ public class LibraryWork {
             printVisitors();
             System.out.println("Выдаём книгу читателю.\nВведите номер читателя из списка (или \"0\" для выхода в предыдущее меню)");
             int numVisitor = selectMenuItem(visitorArray);
+            if (numVisitor == -1) {
+                break;
+            }
             System.out.println("Ок, пришёл читатель " + visitorArray.get(numVisitor).getName() + "\nКакую книгу ему выдаём?");
             printAvailableBooks();
             int numBook = selectMenuItem(booksArray);
@@ -156,7 +198,7 @@ public class LibraryWork {
         }
     }
 
-    public int selectMenuItem(ArrayList arrayList) {
+    public int selectMenuItem(List arrayList) {
         int num = -1;
         while (true) {
             try {
@@ -166,7 +208,6 @@ public class LibraryWork {
                 continue;
             }
             if (num == 0) {
-                // TODO в вызывающий метод не должно ничего передаваться, нужно выходить на уровень выше
                 break;
             } else if (num < 1 || num > arrayList.size()) {
                 System.out.println("Вы ввели неправильное значение." +
@@ -176,5 +217,18 @@ public class LibraryWork {
             return num - 1;
         }
         return num - 1;
+    }
+
+    public void returnBook() {
+        System.out.println("Возврат книги в библиотеку.\nКто к нам пришёл?");
+        printVisitors();
+        int numVisitor = selectMenuItem(visitorArray);
+        System.out.println("Какую книгу возвращает?");
+        printVisitorsBooks(numVisitor);
+        int numBook = selectMenuItem(booksArray);
+        visitorArray.get(numVisitor).getBooksInUse().remove(numBook);
+        booksArray.get(numBook).setIssue(false);
+        booksArray.get(numBook).setReadsBook("=");
+
     }
 }
